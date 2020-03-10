@@ -1,29 +1,49 @@
+{% load i18n %}
+
 {% load static %}
 
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>{% block title %}Магаз{% endblock %}</title>
+        <title>{% block title %}{% trans "Магаз" %}{% endblock %}</title>
         <link href="{% static "css/base.css" %}" rel="stylesheet">
     </head>
 
     <body>
         <div id="header">
-            <a href="/" class="logo">Магаз</a>
+            <a href="/" class="logo">{% trans "Магаз" %}</a>
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            <div class="languages">
+                <p>{% trans "Язык" %}:</p>
+                <ul class="languages">
+                    {% for language in languages %}
+                        <li>
+                            <a href="/{{ language.code }}/"
+                            {% if language.code == LANGUAGE_CODE %} class="selected"{% endif %}>
+                            {{ language.name_local }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
 
         <div id="subheader">
             <div class="cart">
                 {% with total_items=cart|length %}
                     {% if cart|length > 0 %}
-                    Ваша корзина:
-                    <a href="{% url "cart:cart_detail" %}">
-                        {{ total_items }} товар{{ total_items|pluralize:"ов" }},
-                        ${{ cart.get_total_price }}
-                    </a>
+                        {% trans "Ваша корзина:" %}
+                        <a href="{% url "cart:cart_detail" %}">
+                            {% blocktrans with total_items_plural=total_items|pluralize total_price=cart.get_total_price %}
+                            {{ total_items }} шт.{{ total_items_plural }},
+                            ${{ total_price }}
+                            {% endblocktrans %}
+                        </a>
                     {% else %}
-                        Ваша корзина пуста.
+                        {% trans "Ваша корзина пуста." %}
                     {% endif %}
                 {% endwith %}
             </div>
